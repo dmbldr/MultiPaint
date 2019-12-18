@@ -1,3 +1,4 @@
 org/suai/net/Message.class
 org/suai/net/Server$ClientThread.class
+org/suai/io/IOFile.class
 org/suai/net/Server.class

@@ -1,18 +1,20 @@
 package org.suai.net;
 
+import org.suai.io.IOFile;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 public class Server {
 
     public static final int PORT = 10001;
-
-    private static final String filename = "/home/dmbldr/Study/Java/Course/MultiPaint/master-server/src/main/resources/users.txt";
 
     private ServerSocket serverSocket = null;
     private HashMap<String, BufferedImage> boards;
@@ -28,7 +30,7 @@ public class Server {
         boards = new HashMap<>();
         clients = new ArrayList<>();
         consoleSync = new Object();
-        users = initUsers();
+        users = IOFile.initUsers();
         try {
             serverSocket = new ServerSocket(PORT);
             System.out.println("PORT: " + serverSocket.getLocalPort());
@@ -38,28 +40,12 @@ public class Server {
                     clients.add(newClient);
                     clients.get(clients.size() - 1).start();
                 }
-                changeDataBase();
+                IOFile.changeDataBase(users);
             }
         } catch (IOException err) {
             System.out.println(err.getMessage());
         } finally {
-            changeDataBase();
-        }
-    }
-
-    private HashMap<String, String> initUsers() {
-        try(BufferedReader br = new BufferedReader(new FileReader(filename))) {
-            String s;
-            HashMap<String, String> tmp = new HashMap<>();
-            while ((s = br.readLine()) != null) {
-                String[] login = s.split(";");
-                tmp.put(login[0], login[1]);
-            }
-            return tmp;
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            IOFile.changeDataBase(users);
         }
     }
 
@@ -76,15 +62,9 @@ public class Server {
 
     private boolean registration(String name, String password) {
         if(!users.containsKey(name)) {
-            try (BufferedWriter br = new BufferedWriter(new FileWriter(filename, true))) {
-                br.write(name + ";" + password + "\n");
-                br.flush();
-                users.put(name, password);
-                return true;
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
+            IOFile.registration(name, password);
+            users.put(name, password);
+            return true;
         } else {
             return false;
         }
@@ -99,22 +79,6 @@ public class Server {
     private void changePassword(String name, String newPassword) {
         users.remove(name);
         users.put(name, newPassword);
-    }
-
-    private void changeDataBase() {
-        File oldFile = new File(filename);
-        File newFile = new File("/home/dmbldr/Study/Java/Course/MultiPaint/master-server/src/main/resources/users1.txt");
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(newFile, false))) {
-            for(HashMap.Entry<String, String> it : users.entrySet()) {
-                bw.write(it.getKey() + ";" + it.getValue() + "\n");
-                bw.flush();
-            }
-            oldFile.delete();
-            newFile.renameTo(oldFile);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     class ClientThread extends Thread {
@@ -143,8 +107,10 @@ public class Server {
 
         @Override
         public void run() {
+            SimpleDateFormat time = new SimpleDateFormat("HH:mm:ss");
             synchronized (consoleSync) {
-                System.out.println("Клиент подключился");
+                Date now = new Date();
+                System.out.println(time.format(now) + ":  Клиент подключился");
                 synchronized (clients) {
                     System.out.println("Кол-во клиентов: " + clients.size() + "\n");
                 }
@@ -153,13 +119,15 @@ public class Server {
                 try {
                     while (true) {
                         Message message = (Message) readSocket.readObject();
-                        System.out.println(message.getMessage());
                         if(message.getType() == 6) {
                             /***************
                              * REGISTRATION
                              **************/
+                            Date now = new Date();
+                            System.out.print(time.format(now));
                             String[] login = message.getMessage().split(";");
                             if(registration(login[0], login[1])) {
+                                System.out.println(": Registr OK: " + login[0]);
                                 synchronized (this) {
                                     this.userName = login[0];
                                     writeSocket.writeObject(new Message(6, "OK"));
@@ -167,6 +135,7 @@ public class Server {
                                 }
                             }
                             else {
+                                System.out.println(": Registr EXISTS: " + login[0]);
                                 synchronized (this) {
                                     writeSocket.writeObject(new Message(6, "EXISTS"));
                                     writeSocket.flush();
@@ -176,8 +145,12 @@ public class Server {
                             /*******
                              * LOGIN
                              *******/
+                            Date now = new Date();
+                            System.out.print(time.format(now));
+
                             String[] split = message.getMessage().split(";");
                             if(login(split[0], split[1])) {
+                                System.out.println(": Login OK: " + split[0]);
                                 synchronized (this) {
                                     this.userName = split[0];
                                     writeSocket.writeObject(new Message(6, "OK"));
@@ -185,6 +158,7 @@ public class Server {
                                 }
                             }
                             else {
+                                System.out.println(": Login EXISTS: " + split[0]);
                                 synchronized (this) {
                                     writeSocket.writeObject(new Message(6, "EXISTS"));
                                     writeSocket.flush();
@@ -194,12 +168,17 @@ public class Server {
                             /*************
                              * CHANGE NAME
                              ************/
+                            Date now = new Date();
+                            System.out.print(time.format(now));
+
                             if(users.containsKey(message.getMessage())) {
+                                System.out.println(": Change " + userName + " to " + message.getMessage() + " EXISTS");
                                 synchronized (this) {
                                     writeSocket.writeObject(new Message(7, "EXISTS"));
                                     writeSocket.flush();
                                 }
                             } else {
+                                System.out.println(": Change " + userName + " to " + message.getMessage() + " OK");
                                 changeName(userName, message.getMessage());
                                 userName = message.getMessage();
                                 synchronized (this) {
@@ -211,7 +190,11 @@ public class Server {
                             /*************
                              * CHANGE PASSWORD
                              ************/
+                            Date now = new Date();
+                            System.out.print(time.format(now));
+
                             changePassword(userName, message.getMessage());
+                            System.out.println(": Change password " + userName + " OK");
                             synchronized (this) {
                                 writeSocket.writeObject(new Message(8, "OK"));
                                 writeSocket.flush();
@@ -220,10 +203,14 @@ public class Server {
                             /***************
                              * ALL BOARDS
                              **************/
+                            Date now = new Date();
+                            System.out.print(time.format(now));
+
                             StringBuilder allBoard = new StringBuilder();
                             for(HashMap.Entry<String, BufferedImage> entry : boards.entrySet()) {
                                 allBoard.append(entry.getKey()).append(" ");
                             }
+                            System.out.println(": Get all boards name by " + userName + " OK");
                             synchronized (this) {
                                 writeSocket.writeObject(new Message(2,allBoard.toString()));
                                 writeSocket.flush();
@@ -232,16 +219,21 @@ public class Server {
                             /***************
                              * CREATE BOARD
                              **************/
+                            Date now = new Date();
+                            System.out.print(time.format(now));
+
                             boolean isContains;
                             synchronized (boards) {
                                 isContains = boards.containsKey(message.getMessage());
                             }
                             if (isContains) {
+                                System.out.println(": Create board " + message.getMessage() + " by " + userName + " EXISTS");
                                 synchronized (this) {
                                     writeSocket.writeObject(new Message(0, "EXISTS"));
                                     writeSocket.flush();
                                 }
                             } else {
+                                System.out.println(": Create board " + message.getMessage() + " by " + userName + " OK");
                                 synchronized (this) {
                                     writeSocket.writeObject(new Message(0,"OK"));
                                     writeSocket.flush();
@@ -272,6 +264,7 @@ public class Server {
                                 isContains = boards.containsKey(message.getMessage());
                             }
                             if (isContains) {
+                                System.out.println(": Connect board " + message.getMessage() + " by " + userName + " OK");
                                 synchronized (this) {
                                     writeSocket.writeObject(new Message(1,"OK"));
                                     writeSocket.flush();
@@ -290,6 +283,7 @@ public class Server {
                                     writeSocket.flush();
                                 }
                             } else {
+                                System.out.println(": Connect board " + message.getMessage() + " by " + userName + " EXISTS");
                                 synchronized (this) {
                                     writeSocket.writeObject(new Message(1, "NOT FOUND"));
                                     writeSocket.flush();
@@ -321,11 +315,11 @@ public class Server {
                     synchronized (clients) {
                         clients.remove(this);
                         synchronized (consoleSync) {
-                            System.out.println("Клиент недоступен");
+                            Date now = new Date();
+                            System.out.println(time.format(now) + ": Клиент недоступен");
                             System.out.println("Кол-во клиентов: " + clients.size());
                         }
                     }
-                    //checkBoards(boardName);
                 }
             } catch (Exception err) {
                 synchronized (consoleSync) {
