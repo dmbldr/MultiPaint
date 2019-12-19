@@ -39,6 +39,8 @@ public class MainFrame extends JFrame {
 
         setJMenuBar(createMainMenu());
 
+        getContentPane().add(creatToolBar(), BorderLayout.NORTH);
+
         setSize(840, 600);
         setResizable(false);
         setVisible(true);
@@ -61,6 +63,14 @@ public class MainFrame extends JFrame {
         return userMenu;
     }
 
+    private JToolBar creatToolBar() {
+        JToolBar toolBar = new JToolBar();
+        toolBar.add(editActionFactory.getChangeBrushSize());
+        toolBar.add(editActionFactory.getChangeBrushColor());
+        toolBar.setVisible(true);
+        return toolBar;
+    }
+
     private JMenu createBoardMenu() {
         JMenu boardMenu = new JMenu("Board");
         boardMenu.add(boardActionFactory.getNewBoardAction());
@@ -77,7 +87,7 @@ public class MainFrame extends JFrame {
 
     public void createBoard(String mode, String name) {
         this.board = new BoardPanel(this, client, mode, name, Color.black, 10);
-        add(board);
+        getContentPane().add(board, BorderLayout.CENTER);
         repaint();
         revalidate();
     }
@@ -91,7 +101,7 @@ public class MainFrame extends JFrame {
         Message answer = client.getMessage();
         if (answer.getMessage().equals("OK")) {
             this.board = new BoardPanel(this, client, "CONNECT", nameBoard, brushColor, brushSize);
-            add(board);
+            getContentPane().add(board, BorderLayout.CENTER);
             repaint();
             revalidate();
         }
