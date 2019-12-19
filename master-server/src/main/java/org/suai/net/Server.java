@@ -1,6 +1,7 @@
 package org.suai.net;
 
 import org.suai.io.IOFile;
+import org.suai.util.MD5Hash;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -52,7 +53,8 @@ public class Server {
     private boolean login(String name, String password) {
         for(HashMap.Entry<String, String> it : users.entrySet()) {
             if(it.getKey().equals(name)) {
-                if(it.getValue().equals(password)) {
+                String passwordHash = MD5Hash.getHash(password);
+                if(it.getValue().equals(passwordHash)) {
                     return true;
                 }
             }
@@ -62,8 +64,9 @@ public class Server {
 
     private boolean registration(String name, String password) {
         if(!users.containsKey(name)) {
-            IOFile.registration(name, password);
-            users.put(name, password);
+            String passwordHash = MD5Hash.getHash(password);
+            IOFile.registration(name, passwordHash);
+            users.put(name, passwordHash);
             return true;
         } else {
             return false;
@@ -78,7 +81,8 @@ public class Server {
 
     private void changePassword(String name, String newPassword) {
         users.remove(name);
-        users.put(name, newPassword);
+        String passwordHash = MD5Hash.getHash(newPassword);
+        users.put(name, passwordHash);
     }
 
     class ClientThread extends Thread {

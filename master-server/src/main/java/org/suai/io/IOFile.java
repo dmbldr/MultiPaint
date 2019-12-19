@@ -28,14 +28,11 @@ public class IOFile {
 
     public static void changeDataBase(HashMap<String, String> users) {
         File oldFile = new File(filename);
-        File newFile = new File("/home/dmbldr/Study/Java/Course/MultiPaint/master-server/src/main/resources/users1.txt");
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(newFile, false))) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(oldFile, false))) {
             for(HashMap.Entry<String, String> it : users.entrySet()) {
                 bw.write(it.getKey() + ";" + it.getValue() + "\n");
                 bw.flush();
             }
-            oldFile.delete();
-            newFile.renameTo(oldFile);
         }
         catch (IOException e) {
             e.printStackTrace();

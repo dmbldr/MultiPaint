@@ -1,4 +1,5 @@
 org/suai/net/Message.class
 org/suai/net/Server$ClientThread.class
+org/suai/util/MD5Hash.class
 org/suai/io/IOFile.class
 org/suai/net/Server.class
