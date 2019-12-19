@@ -1,13 +1,12 @@
 package org.suai.net;
 
-import org.suai.net.Message;
-
 import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Client {
-    boolean isConnected = false;
+    private String userName;
+    private boolean isBaned;
     String serverHost = null;
     int serverPort;
     Socket clientSocket;
@@ -52,6 +51,21 @@ public class Client {
         return listen.getMessage();
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public boolean getIsBaned() {
+        return isBaned;
+    }
+
+    public void setBaned() {
+        isBaned = true;
+    }
 
     class ListenFromServer extends Thread {
         private ConcurrentLinkedQueue<Message> answers;

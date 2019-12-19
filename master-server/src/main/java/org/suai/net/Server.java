@@ -17,6 +17,8 @@ public class Server {
 
     public static final int PORT = 10001;
 
+    private IOFile ioFile = new IOFile();
+
     private ServerSocket serverSocket = null;
     private HashMap<String, BufferedImage> boards;
     private HashMap<String, String> users;
@@ -31,7 +33,7 @@ public class Server {
         boards = new HashMap<>();
         clients = new ArrayList<>();
         consoleSync = new Object();
-        users = IOFile.initUsers();
+        users = ioFile.initUsers();
         try {
             serverSocket = new ServerSocket(PORT);
             System.out.println("PORT: " + serverSocket.getLocalPort());
@@ -41,12 +43,12 @@ public class Server {
                     clients.add(newClient);
                     clients.get(clients.size() - 1).start();
                 }
-                IOFile.changeDataBase(users);
+                ioFile.changeDataBase(users);
             }
         } catch (IOException err) {
             System.out.println(err.getMessage());
         } finally {
-            IOFile.changeDataBase(users);
+            ioFile.changeDataBase(users);
         }
     }
 
@@ -65,7 +67,7 @@ public class Server {
     private boolean registration(String name, String password) {
         if(!users.containsKey(name)) {
             String passwordHash = MD5Hash.getHash(password);
-            IOFile.registration(name, passwordHash);
+            ioFile.registration(name, passwordHash);
             users.put(name, passwordHash);
             return true;
         } else {
@@ -330,6 +332,14 @@ public class Server {
                     System.out.println(err.toString() + "\n");
                 }
             }
+        }
+
+        private void setBan() {
+            this.isBan = true;
+        }
+
+        private String getUserName() {
+            return userName;
         }
     }
 }

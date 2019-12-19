@@ -106,6 +106,10 @@ public class MainFrame extends JFrame {
         }
     }
 
+    public Client getClient() {
+        return client;
+    }
+
     public BoardPanel getBoard() {
         return this.board;
     }

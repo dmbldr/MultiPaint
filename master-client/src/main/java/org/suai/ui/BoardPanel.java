@@ -39,54 +39,48 @@ public class BoardPanel extends JPanel {
 
         addMouseMotionListener(new MouseMotionAdapter() {
             public void mouseDragged(MouseEvent e) {
-                String message = brushColor.getRGB() + " " + (e.getX() - brushSize / 2) + " " + (e.getY() - brushSize / 2) + " " + brushSize;
-                client.sendToServer(new Message(4, message));
+                if(!client.getIsBaned()) {
+                    String message = brushColor.getRGB() + " " + (e.getX() - brushSize / 2) + " " + (e.getY() - brushSize / 2) + " " + brushSize;
+                    client.sendToServer(new Message(4, message));
 
-                String[] splitMessage = client.getMessage().getMessage().split(" ", 4);
-                int color = Integer.parseInt(splitMessage[0]);
-                int coordX = Integer.parseInt(splitMessage[1]);
-                int coordY = Integer.parseInt(splitMessage[2]);
-                int size = Integer.parseInt(splitMessage[3]);
+                    String[] splitMessage = client.getMessage().getMessage().split(" ", 4);
+                    int color = Integer.parseInt(splitMessage[0]);
+                    int coordX = Integer.parseInt(splitMessage[1]);
+                    int coordY = Integer.parseInt(splitMessage[2]);
+                    int size = Integer.parseInt(splitMessage[3]);
 
-                graphics.setColor(new Color(color));
-                graphics.fillOval(coordX, coordY, size, size);
-                repaint();
+                    graphics.setColor(new Color(color));
+                    graphics.fillOval(coordX, coordY, size, size);
+                    repaint();
+                }
             }
         });
 
         addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                String message = brushColor.getRGB() + " " + (e.getX() - brushSize / 2) + " " + (e.getY() - brushSize / 2) + " " + brushSize;
-                client.sendToServer(new Message(4, message));
+                if(!client.getIsBaned()) {
+                    String message = brushColor.getRGB() + " " + (e.getX() - brushSize / 2) + " " + (e.getY() - brushSize / 2) + " " + brushSize;
+                    client.sendToServer(new Message(4, message));
 
-                String[] splitMessage = client.getMessage().getMessage().split(" ", 4);
-                int color = Integer.parseInt(splitMessage[0]);
-                int coordX = Integer.parseInt(splitMessage[1]);
-                int coordY = Integer.parseInt(splitMessage[2]);
-                int size = Integer.parseInt(splitMessage[3]);
+                    String[] splitMessage = client.getMessage().getMessage().split(" ", 4);
+                    int color = Integer.parseInt(splitMessage[0]);
+                    int coordX = Integer.parseInt(splitMessage[1]);
+                    int coordY = Integer.parseInt(splitMessage[2]);
+                    int size = Integer.parseInt(splitMessage[3]);
 
-                graphics.setColor(new Color(color));
-                graphics.fillOval(coordX, coordY, size, size);
-                repaint();
+                    graphics.setColor(new Color(color));
+                    graphics.fillOval(coordX, coordY, size, size);
+                    repaint();
+                }
             }
         });
-/*
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                mainFrame.repaintBoard();
-            }
-        });
-*/
+
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
                 mainFrame.repaintBoard();
             }
         });
-
-        //Thread draw = new Thread(new Draw());
-        //draw.start();
 
     }
 

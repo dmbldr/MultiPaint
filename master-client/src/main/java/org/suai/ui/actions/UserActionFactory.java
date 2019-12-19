@@ -21,7 +21,6 @@ public class UserActionFactory {
 
     private final Action changePasswordAction;
 
-
     public UserActionFactory(MainFrame mainFrame, Client client) {
         this.mainFrame = mainFrame;
         this.client = client;
@@ -60,6 +59,7 @@ public class UserActionFactory {
             Message answer = client.getMessage();
             if (answer.getMessage().equals("OK")) {
                 mainFrame.setIsConnected(true);
+                client.setUserName(authDialog.getUserName());
                 JOptionPane.showMessageDialog(mainFrame, "Registration OK");
             } else if(answer.getMessage().equals("EXISTS")) {
                 JOptionPane.showMessageDialog(mainFrame, "Registration EXISTS: a User with that name already exists");
@@ -79,6 +79,7 @@ public class UserActionFactory {
             Message answer = client.getMessage();
             if (answer.getMessage().equals("OK")) {
                 mainFrame.setIsConnected(true);
+                client.setUserName(authDialog.getUserName());
                 JOptionPane.showMessageDialog(mainFrame, "LOGIN OK");
             } else if(answer.getMessage().equals("EXISTS")) {
                 JOptionPane.showMessageDialog(mainFrame, "LOGIN EXISTS: User's name/password invalid");
@@ -98,6 +99,7 @@ public class UserActionFactory {
                 client.sendToServer(new Message(7, name));
                 Message answer = client.getMessage();
                 if (answer.getMessage().equals("OK")) {
+                    client.setUserName(name);
                     JOptionPane.showMessageDialog(mainFrame, "CHANGE NAME OK");
                 } else if(answer.getMessage().equals("EXISTS")) {
                     JOptionPane.showMessageDialog(mainFrame, "CHANGE NAME EXISTS: User's name already exists");

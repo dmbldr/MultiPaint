@@ -15,6 +15,7 @@ public class Message implements Serializable {
     private static final int REGISTR = 6;
     private static final int CHANGENAME = 7;
     private static final int CHANGEPASSWORD = 8;
+    private static final int BAN = 9;
 
     private int type;
     private String message;
